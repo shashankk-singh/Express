@@ -18,29 +18,45 @@ app.get('/about', (req, res) => {
 
 
 app.get('/users', async(req , res) => {
-  const users = await User.find();
+  try
+  {const users = await User.find();
   res.status(200).json({users});
+  } catch (err) {
+    res.status(500).json({ "message": "Error fetching users", "error": err.message });
+  } 
 });
 
 // Create a new user
 app.post('/users', async (req, res) => {
-  const newuser = new User(req.body);
-  await newuser.save();
-  res.status(200).json({ "message": "User created successfully", "user": newuser });
+  try{
+    const newuser = new User(req.body);
+    await newuser.save();
+    res.status(200).json({ "message": "User created successfully", "user": newuser });
+  } catch (err) {
+    res.status(500).json({ "message": "Error creating user", "error": err.message });
+  }
 });
 
 //delete a user
 app.delete('/users/:id', async(req, res) => {
-  const deletedUser = await User.findByIdAndDelete(req.params.id);
-  res.status(200).json({ "message": "User deleted successfully", "details": deletedUser });
+  try{
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ "message": "User deleted successfully", "details": deletedUser });
+  } catch (err) {
+    res.status(500).json({ "message": "Error deleting user", "error": err.message });
+  }
 });
 
 // update user
 app.put("/users/:id" , async (req ,res) => {
-  const body = req.body;
-  const id = req.params.id;
-  const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
-  res.status(200).json({ "message": "User updated successfully", "details": updatedUser });  
+  try{
+    const body = req.body;
+    const id = req.params.id;
+    const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
+    res.status(200).json({ "message": "User updated successfully", "details": updatedUser });
+  } catch (err) {
+    res.status(500).json({ "message": "Error updating user", "error": err.message });
+  }
 });
 
 // Connect to MongoDB
