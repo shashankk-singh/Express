@@ -1,12 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = 3000;
+const mongoose = require('mongoose')
 app.use(express.json());
 
-let users = [
-  { "id": 1, "name": "Shashank", "role": "admin" },
-  { "id": 2, "name": "Ravi", "role": "user" }
-];
+const User = require('./user');
 
 // Define routes
 app.get('/', (req, res) => {
@@ -18,37 +17,36 @@ app.get('/about', (req, res) => {
 }); 
 
 
-app.get('/users', (req , res) => {
-  res.status(200).json(users);
+app.get('/users', async(req , res) => {
+  const users = await User.find();
+  res.status(200).json({users});
 });
 
 // Create a new user
-app.post('/users', (req, res) => {
-  let newuser = req.body;
-  users.push(newuser);
-  res.status(201).json({ "message": "User created successfully", "user": newuser });
+app.post('/users', async (req, res) => {
+  const newuser = new User(req.body);
+  await newuser.save();
+  res.status(200).json({ "message": "User created successfully", "user": newuser });
 });
 
 //delete a user
-app.delete('/users/:id', (req, res) => {
-  let id = Number(req.params.id);
-  users = users.filter((item) => item.id !== id);
-  res.status(200).json({ "message": "User deleted successfully", "details": users });
+app.delete('/users/:id', async(req, res) => {
+  const deletedUser = await User.findByIdAndDelete(req.params.id);
+  res.status(200).json({ "message": "User deleted successfully", "details": deletedUser });
 });
 
 // update user
-app.put("/users/:id" , (req ,res) => {
-  let body = req.body;
-  let id = Number(req.params.id);
-  users = users.map((item) => {
-    if (id == item.id){
-      return {...item , ...body}
-    }
-    return item
-  });
-  
-  res.status(200).json({ "message": "User updated successfully", "details": users });  
+app.put("/users/:id" , async (req ,res) => {
+  const body = req.body;
+  const id = req.params.id;
+  const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
+  res.status(200).json({ "message": "User updated successfully", "details": updatedUser });  
 });
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.log('Connection failed', err))
 
 
 // Start the server
