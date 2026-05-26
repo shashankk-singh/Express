@@ -4,7 +4,7 @@ const app = express();
 const port = 3000;
 const mongoose = require('mongoose')
 app.use(express.json());
-
+const authenticate = require('./middleware')
 const User = require('./user');
 
 // Define routes
@@ -17,9 +17,9 @@ app.get('/about', (req, res) => {
 }); 
 
 
-app.get('/users', async(req , res) => {
-  try
-  {const users = await User.find();
+app.get('/users', authenticate, async(req , res) => {
+  try{
+  const users = await User.find();
   res.status(200).json({users});
   } catch (err) {
     res.status(500).json({ "message": "Error fetching users", "error": err.message });
@@ -58,6 +58,9 @@ app.put("/users/:id" , async (req ,res) => {
     res.status(500).json({ "message": "Error updating user", "error": err.message });
   }
 });
+
+// Auth routes
+app.use('/auth', require('./auth'));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
