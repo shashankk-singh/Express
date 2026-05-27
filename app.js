@@ -17,7 +17,7 @@ app.get('/about', (req, res) => {
 }); 
 
 
-app.get('/users', authenticate, async(req , res) => {
+app.get('/users', async(req , res) => {
   try{
   const users = await User.find();
   res.status(200).json({users});
