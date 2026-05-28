@@ -45,7 +45,7 @@ describe('PUT /users', () => {
     const res = await request(app).put(`/users/${id}`)
       .send({ name: 'UpdatedUser', role: 'user' })
     expect(res.statusCode).toBe(200)
-    expect(res.body.details.name).toBe('UpdatedUser')
+    expect(res.body.user.name).toBe('UpdatedUser')
   })
   it ('should return 404 and user not found'  , async() => {
   const fakeId = '000000000000000000000000'
