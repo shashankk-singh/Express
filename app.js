@@ -27,7 +27,7 @@ app.get('/users', async(req , res) => {
 });
 
 // Create a new user
-app.post('/users', async (req, res) => {
+app.post('/users', authenticate , async (req, res) => {
   try{
     const newuser = new User(req.body);
     await newuser.save();
@@ -41,6 +41,9 @@ app.post('/users', async (req, res) => {
 app.delete('/users/:id', async(req, res) => {
   try{
     const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if(deletedUser == null){
+      return res.status(404).json({ "message": "user not found"});
+    }
     res.status(200).json({ "message": "User deleted successfully", "details": deletedUser });
   } catch (err) {
     res.status(500).json({ "message": "Error deleting user", "error": err.message });
@@ -53,6 +56,9 @@ app.put("/users/:id" , async (req ,res) => {
     const body = req.body;
     const id = req.params.id;
     const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
+    if(updatedUser == null){
+      return res.status(404).json({"message": "user not found"})
+    }
     res.status(200).json({ "message": "User updated successfully", "details": updatedUser });
   } catch (err) {
     res.status(500).json({ "message": "Error updating user", "error": err.message });

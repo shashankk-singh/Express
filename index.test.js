@@ -1,6 +1,7 @@
 const request = require('supertest')
 const app = require('./app')
 const mongoose = require('mongoose')
+const User = require('./user')
 const { put } = require('./auth')
 
 beforeAll(async() => {
@@ -36,19 +37,33 @@ describe('POST /auth/register' , () => {
     })
 })
 
-describe('PUT /users' , () => {
-  it('should return 200 and User updated successfully' , async() => {
-    const id = '6a1732c818ec563183fe4fe2'
+describe('PUT /users', () => {
+  it('should return 200 and update the user', async () => {
+    // first create a user
+    const newUser = await User.create({ name: 'TestUser', email: 'put@test.com', password: '123456', role: 'user' })
+    const id = newUser._id
     const res = await request(app).put(`/users/${id}`)
-    .send({name: "Test_Updated_User",email: "test@test.com",role: "user"})
+      .send({ name: 'UpdatedUser', role: 'user' })
     expect(res.statusCode).toBe(200)
+    expect(res.body.details.name).toBe('UpdatedUser')
   })
+  it ('should return 404 and user not found'  , async() => {
+  const fakeId = '000000000000000000000000'
+  const res = await request(app).put(`/users/${fakeId}`)
+  expect(res.statusCode).toBe(404)
+})
 })
 
-describe('DELETE /users' , () => {
-  it('should return 200 and User deleted successfully' , async() => {
-    const id = '6a1732c818ec563183fe4fe2'
+describe('DELETE /user' , () => {
+  it ('should return 200 and User deleted successfully' , async() => {
+    const newUser = await User.create({ name: 'TestUser', email: 'del@test.com', password: '123456', role: 'user' })
+    const id = newUser._id
     const res = await request(app).delete(`/users/${id}`)
     expect(res.statusCode).toBe(200)
   })
+it ('should return 404 and user not found'  , async() => {
+  const fakeId = '000000000000000000000000'
+  const res = await request(app).delete(`/users/${fakeId}`)
+  expect(res.statusCode).toBe(404)
+})
 })
